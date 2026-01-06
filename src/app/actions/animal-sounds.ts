@@ -9,9 +9,8 @@
  * - AnimalSoundInputSchema: Zod schema for the flow's input.
  * - AnimalSoundOutputSchema: Zod schema for the flow's output.
  * - getAnimalSoundFlow: The main server action that invokes the Genkit flow.
- */
-
-import { ai } from '@/lib/genkit';
+ 
+ import { ai } from '../../lib/genkit'; 
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/google-genai';
 import wav from 'wav';
