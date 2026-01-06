@@ -11,7 +11,7 @@
  * - getAnimalSoundFlow: The main server action that invokes the Genkit flow.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai } from '@/lib/genkit';
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/google-genai';
 import wav from 'wav';
