@@ -6,7 +6,7 @@
  * - AdventureInput: Input type for the flow.
  * - AdventureOutput: Output type for the flow.
  */
-import { ai } from '../lib/genkit';
+import { ai } from '@/lib/genkit';
 import { z } from 'genkit';
 
 const AdventureInputSchema = z.object({
