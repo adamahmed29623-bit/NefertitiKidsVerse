@@ -7,7 +7,7 @@
  * - AdventureOutput: Output type for the flow.
  */
 
-import { ai } from '../lib/genkit';
+import { ai } from '@/lib/genkit';
 import { z } from 'genkit';
 
 const AdventureInputSchema = z.object({
@@ -37,7 +37,7 @@ const challengePrompt = ai.definePrompt({
     `,
 });
 
-const correctionPrompt = ai.definePrompt({
+const {output} = await ai.generate({ prompt: challengeprompt });
     name: 'correctionPrompt',
     input: { schema: z.object({ userInput: z.string() }) },
     prompt: `You are a friendly and encouraging Egyptian Arabic teacher at "Yalla Masry Academy."
