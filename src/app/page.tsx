@@ -1,8 +1,10 @@
+
 "use client";
 import React, { useState } from 'react';
-import PharaohAvatar from '@/components/PharaohAvatar'; 
-import Navbar from '@/components/Navbar'; 
 
+// استيراد باستخدام الحروف الصغيرة كما سميتِ الملفات
+import PharaohAvatar from '../components/pharaohavatar'; 
+import Navbar from '../components/navbar'; 
 export default function NefertitiOS() {
   const [command, setCommand] = useState('');
   const [messages, setMessages] = useState([
