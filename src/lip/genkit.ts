@@ -6,11 +6,11 @@ import { dotPrompt } from '@genkit-ai/dotprompt';
  * إعداد محرك الذكاء الاصطناعي للأكاديمية (Nefertiti AI Engine)
  * يتم استخدام Gemini 2.5 Flash لضمان سرعة الاستجابة للأطفال.
  */
-export const ai = genkit;
+export const ai = genkit({
   plugins: [
     googleAI({
       // تأكدي من إضافة GOOGLE_GENAI_API_KEY في إعدادات Vercel
-      apiKey: process.env.GOOGLE_GENAI_API_KEY, 
+      apiKey: process.env.GOOGLE_GENAI_API_KEY,
     }),
     dotPrompt(),
   ],
