@@ -1,10 +1,11 @@
 "use client";
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 // استدعاء المكونات بالأسماء الصغيرة كما اعتمدتِها
 import PharaohAvatar from '../components/pharaohavatar'; 
 import Navbar from '../components/navbar'; 
 
-export default function NefertitiOS() {
+export default function NefertitiOS(const router = useRouter();) {
   const [command, setCommand] = useState('');
   const [showAvatar, setShowAvatar] = useState(false);
   const [showUI, setShowUI] = useState(false);
@@ -34,6 +35,14 @@ export default function NefertitiOS() {
     else if (cmd.includes('ابدء') || cmd.includes('تحدى') || cmd.includes('مغامره') || cmd.includes('افتح')) {
       setShowUI(true); // تفعيل شريط التنقل العلوي
       response = { text: 'جاري فتح بوابات الأكاديمية والمسارات الملكية... استعدي للرحلة.', type: 'success' };
+    }else if (cmd.includes('ابدء') || cmd.includes('تحدى')) {
+      setShowUI(true);
+      response = { text: 'جاري فتح بوابات الأكاديمية... استعدي للرحلة.', type: 'success' };
+      
+      // أضيفي هذا السطر هنا ليفتح صفحة العرش تلقائياً
+      setTimeout(() => {
+        router.push('/dashboard'); 
+      }, 2000);
     }
 
     setMessages(prev => [...prev, newMsg, response]);
