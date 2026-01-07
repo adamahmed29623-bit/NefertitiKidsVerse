@@ -1,94 +1,99 @@
 "use client";
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation'; // محرك الانتقال الملكي
-// استدعاء المكونات بالأسماء الصغيرة كما اعتمدتِها
-import PharaohAvatar from '../components/pharaohavatar'; 
-import Navbar from '../components/navbar'; 
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mic, Sparkles, Trophy, Globe } from 'lucide-react';
 
-export default function NefertitiOS() {
-  const router = useRouter(); // تفعيل المحرك داخل الدالة بشكل صحيح
-  const [command, setCommand] = useState('');
-  const [showAvatar, setShowAvatar] = useState(false);
-  const [showUI, setShowUI] = useState(false);
-  const [messages, setMessages] = useState([
-    { text: 'Quantum Link: Secured', type: 'system' },
-    { text: 'Nefertiti KidsVerse OS v1.0.4 initialized...', type: 'system' },
-    { text: 'أهلاً بكِ يا ملكة نفرتيتي. الأكاديمية بانتظار أوامركِ.', type: 'welcome' }
-  ]);
+export default function RoyalAcademy() {
+  const [status, setStatus] = useState('IDLE'); // IDLE, LISTENING, SUCCESS, ERROR
+  const [xp, setXp] = useState(0);
+  const [message, setMessage] = useState("Tap to wake the Golden Voice");
 
-  const handleAction = () => {
-    const cmd = command.trim();
-    if (!cmd) return;
-
-    const newMsg = { text: `> ${cmd}`, type: 'cmd' };
-    let response = { text: 'عذراً، هذه الشفرة غير مسجلة في الأرشيف الملكي.', type: 'error' };
-
-    // 1. أمر الخلق (الأفاتار)
-    if (cmd.includes('خلق')) {
-      setShowAvatar(true);
-      response = { text: 'تم استدعاء الأفاتار الملكي بنجاح! انظر لجهة اليمين.', type: 'success' };
-    } 
-    // 2. أمر المساعد (توت)
-    else if (cmd.includes('توت')) {
-      response = { text: 'المساعد الملكي "توت" في خدمتكِ الآن يا جلالة الملكة.', type: 'success' };
-    }
-    // 3. أمر البدء (الانتقال من الشاشة السوداء)
-    else if (cmd.includes('ابدء') || cmd.includes('تحدى') || cmd.includes('مغامره') || cmd.includes('افتح')) {
-      setShowUI(true); 
-      response = { text: 'جاري فتح بوابات الأكاديمية... استعدي للانتقال للعرش.', type: 'success' };
-      
-      // السطر السحري للانتقال إلى صفحة الـ dashboard بعد ثانيتين
-      setTimeout(() => {
-        router.push('/dashboard'); 
-      }, 2000);
+  // اختراع "صدى الكلمات" بالعامية المصرية [cite: 2025-12-24]
+  const startVoiceMagic = () => {
+    const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!Recognition) {
+      setMessage("Update your browser to hear the Magic");
+      return;
     }
 
-    setMessages(prev => [...prev, newMsg, response]);
-    setCommand('');
+    const mic = new Recognition();
+    mic.lang = 'ar-EG'; // تفعيل اللهجة المصرية [cite: 2025-12-24]
+    
+    mic.onstart = () => {
+      setStatus('LISTENING');
+      setMessage("Gemini is listening... Say 'NOUR'");
+    };
+
+    mic.onresult = (e: any) => {
+      const transcript = e.results[0][0].transcript;
+      // التحقق من النطق بالعامية [cite: 2025-12-24]
+      if (transcript.includes("نور") || transcript.toLowerCase().includes("nour")) {
+        setStatus('SUCCESS');
+        setXp(500);
+        setMessage("MUBARAK! You brought the Light!");
+      } else {
+        setStatus('ERROR');
+        setMessage(`You said '${transcript}', try again: 'NOUR'`);
+      }
+    };
+
+    mic.onerror = () => setStatus('IDLE');
+    mic.onend = () => { if(status !== 'SUCCESS') setStatus('IDLE'); };
+    mic.start();
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-mono relative overflow-hidden flex flex-col">
-      {showUI && <div className="animate-in slide-in-from-top duration-1000"><Navbar /></div>}
+    <div className={`min-h-screen transition-all duration-[2000ms] flex flex-col items-center justify-center overflow-hidden ${status === 'SUCCESS' ? 'bg-[#D4AF37]' : 'bg-[#050505]'}`}>
+      
+      {/* رادار التقدم الملكي */}
+      <div className="fixed top-10 right-10 flex items-center gap-4 bg-white/5 p-4 rounded-full border border-white/10 backdrop-blur-xl">
+        <Trophy className={status === 'SUCCESS' ? 'text-black' : 'text-[#D4AF37]'} />
+        <span className={`text-2xl font-black ${status === 'SUCCESS' ? 'text-black' : 'text-white'}`}>{xp} XP</span>
+      </div>
 
-      <main className="flex-1 p-6 md:p-12 flex flex-col md:flex-row items-center justify-between">
-        <div className="w-full md:w-1/2 z-10">
-          <div className="bg-black/40 backdrop-blur-sm border border-yellow-900/20 rounded-xl p-4 mb-6 h-[400px] overflow-y-auto">
-            {messages.map((m, i) => (
-              <div key={i} className={`mb-2 text-lg ${
-                m.type === 'success' ? 'text-green-400 font-bold' : 
-                m.type === 'welcome' ? 'text-yellow-500 font-bold' : 'text-gray-400'
-              }`}>
-                {m.text}
-              </div>
-            ))}
-          </div>
-
-          <div className="relative flex gap-2 bg-[#0a0a0a] p-3 rounded-lg border border-yellow-600/30">
-            <span className="text-yellow-500 font-bold flex items-center pl-2">⚡</span>
-            <input 
-              className="bg-transparent outline-none flex-1 text-white py-2"
-              value={command}
-              onChange={(e) => setCommand(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAction()}
-              placeholder="أدخلي شفرة الأمر الملكي..."
-            />
-            <button onClick={handleAction} className="bg-yellow-600/20 border border-yellow-600/50 px-6 py-2 rounded text-yellow-500 font-bold">إرسال</button>
-          </div>
-        </div>
-
-        <div className="w-full md:w-1/3 flex flex-col items-center justify-center">
-          {showAvatar && (
-            <div className="animate-in zoom-in duration-1000 flex flex-col items-center">
-              <PharaohAvatar />
-              <div className="mt-6 px-8 py-2 border-2 border-yellow-600 text-[#D4AF37] font-bold rounded-full">الهوية الرقمية مفعلة</div>
-            </div>
+      {/* بوابة الاختراع المريخية [cite: 2025-12-24] */}
+      <main className="text-center z-10">
+        <motion.div
+          animate={status === 'LISTENING' ? { scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] } : {}}
+          transition={{ repeat: Infinity, duration: 2 }}
+          onClick={startVoiceMagic}
+          className={`w-48 h-48 mx-auto rounded-full flex items-center justify-center cursor-pointer relative shadow-2xl transition-all ${status === 'SUCCESS' ? 'bg-white' : 'bg-gradient-to-tr from-[#D4AF37] to-[#ffd700]'}`}
+        >
+          {status === 'LISTENING' ? <Sparkles className="w-20 h-20 text-white animate-pulse" /> : <Mic className={`w-20 h-20 ${status === 'SUCCESS' ? 'text-black' : 'text-white'}`} />}
+          {status === 'LISTENING' && (
+            <div className="absolute inset-0 rounded-full border-4 border-cyan-400 animate-ping" />
           )}
+        </motion.div>
+
+        <div className="mt-12 space-y-4">
+          <motion.h1 
+            key={message}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`text-4xl font-serif tracking-[10px] uppercase ${status === 'SUCCESS' ? 'text-black' : 'text-[#D4AF37]'}`}
+          >
+            {status === 'SUCCESS' ? "Welcome Home" : "Yalla Masry"}
+          </motion.h1>
+          <p className={`text-xl font-light italic ${status === 'SUCCESS' ? 'text-black/60' : 'text-white/40'}`}>
+            {message}
+          </p>
         </div>
       </main>
 
-      <footer className="p-6 opacity-20 text-[10px] tracking-[8px] uppercase text-center w-full">
-        Nexus Protocol Active • Nefertiti Academy v1.0
+      {/* الهوية البصرية للأكاديمية [cite: 2025-12-24] */}
+      <footer className="fixed bottom-10 flex flex-col items-center gap-2">
+        <div className="flex gap-2">
+          <Globe className={`w-4 h-4 ${status === 'SUCCESS' ? 'text-black' : 'text-[#D4AF37]'}`} />
+          <span className={`text-[10px] tracking-[10px] uppercase ${status === 'SUCCESS' ? 'text-black' : 'text-white/30'}`}>
+            Nefertiti Academy • Mars Branch
+          </span>
+        </div>
+        <div className={`h-1 w-24 rounded-full ${status === 'SUCCESS' ? 'bg-black/20' : 'bg-[#D4AF37]/20'}`}>
+          <motion.div 
+            animate={{ width: status === 'SUCCESS' ? '100%' : '30%' }}
+            className={`h-full rounded-full ${status === 'SUCCESS' ? 'bg-black' : 'bg-[#D4AF37]'}`} 
+          />
+        </div>
       </footer>
     </div>
   );
