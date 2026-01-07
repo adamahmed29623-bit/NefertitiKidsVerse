@@ -1,7 +1,9 @@
-{
-	"telemetry": {
-		"notifiedAt": "1767740110194",
-		"anonymousId": "041accddabbfed0a793cc9554807925df3013e932912e52586102b9ff50a7f1a",
-		"salt": "3d4d1b5f471afa04f407edae11b6a100"
-	}
-}
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export', // هذا السطر هو مفتاح الحل لإنشاء مجلد out
+  images: {
+    unoptimized: true, // ضروري عند استخدام الاستخراج الساكن
+  },
+};
+
+export default nextConfig;
