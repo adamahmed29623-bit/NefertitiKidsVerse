@@ -1,140 +1,115 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Sparkles, Trophy, Globe, Lock, Volume2 } from 'lucide-react';
+import { Sparkles, Globe } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export default function NefertitiEntrance() {
-  const [status, setStatus] = useState('IDLE'); // IDLE, LISTENING, SUCCESS, ERROR
-  const [message, setMessage] = useState("The King is waiting for your touch...");
+export default function RoyalEntrance() {
+  const [status, setStatus] = useState('IDLE'); // IDLE, TALKING, LISTENING, SUCCESS
+  const [message, setMessage] = useState("Touch the Ankh to hear King Tut");
   const router = useRouter();
 
-  // وظيفة نداء الملك توت عنخ آمون بالإنجليزية [cite: 2025-12-24]
-  const activateRoyalVoice = () => {
-    // إلغاء أي صوت معلق لضمان الاستجابة الفورية [cite: 2025-12-24]
+  const activateKingTut = () => {
     window.speechSynthesis.cancel();
-
     const msg = new SpeechSynthesisUtterance(
       "Welcome, my little Pharaoh. I am King Tut. Speak the magic word NOUR to unlock the gates of your Martian adventure!"
     );
-    
     msg.lang = 'en-US';
-    msg.rate = 0.85; // نبرة ملكية فخمة وهادئة [cite: 2025-12-24]
-    msg.pitch = 1;
+    msg.rate = 0.85;
 
     msg.onstart = () => {
       setStatus('TALKING');
-      setMessage("King Tut is speaking to you...");
+      setMessage("King Tut is speaking...");
     };
 
     msg.onend = () => {
-      // بمجرد انتهاء الملك من الكلام، نفتح الميكروفون تلقائياً [cite: 2025-12-24]
       startVoiceMagic();
     };
 
     window.speechSynthesis.speak(msg);
   };
 
-  // وظيفة استقبال كلمة "نور" بالعامية المصرية [cite: 2025-12-24]
   const startVoiceMagic = () => {
     const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!Recognition) {
-      setMessage("Browser does not support voice magic.");
-      return;
-    }
+    if (!Recognition) return;
 
     const mic = new Recognition();
-    mic.lang = 'ar-EG'; // تفعيل الهوية المصرية [cite: 2025-12-24]
+    mic.lang = 'ar-EG';
     
     mic.onstart = () => {
       setStatus('LISTENING');
-      setMessage("The Oracle is listening... Say 'NOUR'");
+      setMessage("Now, say the magic word: 'NOUR'");
     };
 
     mic.onresult = (e: any) => {
       const transcript = e.results[0][0].transcript.trim();
-      // التحقق من كلمة السر [cite: 2025-12-24]
       if (transcript.includes("نور") || transcript.toLowerCase().includes("nour")) {
         setStatus('SUCCESS');
-        setMessage("MUBARAK! The Gates of Mars are Opening...");
-        // انتقال ملكي للوحة التحكم بعد النجاح [cite: 2025-12-24]
-        setTimeout(() => router.push('/academy'), 2500);
+        setMessage("MUBARAK! Opening the Golden Gates...");
+        setTimeout(() => router.push('/academy'), 2000);
       } else {
-        setStatus('ERROR');
-        setMessage(`The King heard '${transcript}'.. Try again!`);
-        setTimeout(() => setStatus('IDLE'), 3000);
+        setStatus('IDLE');
+        setMessage("The King didn't hear 'NOUR'. Try again!");
       }
     };
-
-    mic.onerror = () => {
-      setStatus('ERROR');
-      setMessage("Access Denied. Check your microphone settings.");
-    };
-
     mic.start();
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center overflow-hidden font-serif">
-      {/* غبار النجوم الذهبي في الخلفية [cite: 2025-12-24] */}
-      <div className="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/gold-dust.png')] opacity-20 pointer-events-none" />
-
-      <main className="text-center z-10 px-4">
+    <div className="min-h-screen bg-[#002366] flex flex-col items-center justify-center relative overflow-hidden font-serif">
+      {/* تأثير الغبار الذهبي على الخلفية الزرقاء الملكية [cite: 2025-12-24] */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/gold-dust.png')] opacity-30 pointer-events-none" />
+      
+      {/* المحتوى المركزي [cite: 2025-12-24] */}
+      <main className="z-10 flex flex-col items-center text-center px-6">
+        
+        {/* زر مفتاح الحياة (The Ankh Button) [cite: 2025-12-24] */}
         <motion.div
-          whileHover={{ scale: 1.05, boxShadow: "0px 0px 80px rgba(212,175,55,0.4)" }}
-          whileTap={{ scale: 0.95 }}
-          onClick={activateRoyalVoice}
-          className={`w-64 h-64 mx-auto rounded-full flex flex-col items-center justify-center cursor-pointer relative shadow-2xl transition-all duration-1000 ${
-            status === 'SUCCESS' ? 'bg-[#D4AF37] scale-150' : 
-            status === 'LISTENING' ? 'bg-[#ffd700] shadow-[0_0_50px_#fff]' :
-            'bg-gradient-to-tr from-[#D4AF37] to-[#8B4513]'
-          }`}
+          onClick={activateKingTut}
+          whileHover={{ scale: 1.1, filter: "drop-shadow(0 0 30px #D4AF37)" }}
+          whileTap={{ scale: 0.9 }}
+          animate={status === 'TALKING' || status === 'LISTENING' ? { 
+            filter: ["drop-shadow(0 0 20px #D4AF37)", "drop-shadow(0 0 60px #ffd700)", "drop-shadow(0 0 20px #D4AF37)"]
+          } : {}}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="cursor-pointer mb-12"
         >
-          <AnimatePresence mode="wait">
-            {status === 'SUCCESS' ? (
-              <motion.div key="success" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <Sparkles className="w-32 h-32 text-white animate-spin" />
-              </motion.div>
-            ) : (
-              <motion.div key="idle" className="flex flex-col items-center">
-                <Mic className={`w-20 h-20 ${status === 'LISTENING' ? 'text-white animate-pulse' : 'text-black/80'}`} />
-                {status === 'IDLE' && <Volume2 className="w-6 h-6 text-black/40 mt-2 animate-bounce" />}
-              </motion.div>
-            )}
-          </AnimatePresence>
-          
-          {/* حلقة النور الدورانية [cite: 2025-12-24] */}
-          {status === 'LISTENING' && (
-            <div className="absolute inset-0 rounded-full border-4 border-white animate-ping opacity-20" />
-          )}
+          {/* رسم مفتاح الحياة بالـ SVG ليكون واضحاً ويلمع [cite: 2025-12-24] */}
+          <svg width="120" height="200" viewBox="0 0 100 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 10C35 10 25 22 25 35C25 55 50 75 50 75C50 75 75 55 75 35C75 22 65 10 50 10Z" stroke="#D4AF37" strokeWidth="8" fill={status === 'SUCCESS' ? "#D4AF37" : "transparent"} className="transition-all duration-1000"/>
+            <path d="M50 75V150" stroke="#D4AF37" strokeWidth="8" strokeLinecap="round"/>
+            <path d="M20 90H80" stroke="#D4AF37" strokeWidth="8" strokeLinecap="round"/>
+          </svg>
         </motion.div>
 
-        <div className="mt-16 space-y-6">
-          <motion.h1 
-            className="text-[#D4AF37] text-4xl md:text-5xl font-bold tracking-[15px] uppercase"
-            animate={status === 'SUCCESS' ? { letterSpacing: "25px", opacity: 0 } : {}}
-          >
-            {status === 'SUCCESS' ? "Welcome Home" : "Nefertiti Academy"}
-          </motion.h1>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          key={message}
+          className="space-y-6"
+        >
+          <h1 className="text-[#D4AF37] text-4xl md:text-6xl font-black tracking-[10px] uppercase drop-shadow-lg">
+            NEFERTITI ACADEMY
+          </h1>
           
-          <div className="h-12">
-            <p className={`text-xl font-light italic transition-all duration-500 ${status === 'ERROR' ? 'text-red-500' : 'text-white/70'}`}>
+          <div className="h-10">
+            <p className="text-white text-xl md:text-2xl font-light italic tracking-widest opacity-90 transition-all">
+              {status === 'SUCCESS' ? <Sparkles className="inline mr-2" /> : null}
               {message}
             </p>
           </div>
-        </div>
+        </motion.div>
+
+        {status === 'LISTENING' && (
+          <motion.div 
+            initial={{ scale: 0.8 }} animate={{ scale: 1.1 }}
+            className="mt-8 w-4 h-4 bg-[#D4AF37] rounded-full animate-ping"
+          />
+        )}
       </main>
 
-      {/* شريط التقدم الملكي [cite: 2025-12-24] */}
-      <footer className="fixed bottom-10 flex flex-col items-center gap-4 opacity-40 hover:opacity-100 transition-opacity">
-        <div className="flex gap-3 items-center">
-          <Globe className="w-4 h-4 text-[#D4AF37]" />
-          <span className="text-[10px] tracking-[10px] uppercase text-white">
-            Mars Settlement • Sector 28
-          </span>
-        </div>
-        <div className="w-48 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
-      </footer>
+      {/* تزيين الحواف [cite: 2025-12-24] */}
+      <div className="fixed bottom-0 left-0 w-full h-2 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent opacity-50" />
     </div>
   );
 }
