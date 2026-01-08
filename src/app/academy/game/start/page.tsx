@@ -1,144 +1,150 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crown, Sparkles, Mic, UserCheck } from 'lucide-react';
+import { Crown, Mic, Sparkles, Wand2 } from 'lucide-react';
 
-export default function GameStart() {
-  const [gameState, setGameState] = useState('WELCOME'); // WELCOME, NAMING, AVATAR_SELECTION
-  const [playerName, setPlayerName] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState(null);
+export default function PharaonicLauncher() {
+  const [step, setStep] = useState('ENTRANCE'); // ENTRANCE, NAMING, BUILDING_AVATAR
+  const [name, setName] = useState('');
+  const [isBuilding, setIsBuilding] = useState(false);
 
-  // نداء الملك توت [cite: 2025-12-24]
-  const playTutGreeting = () => {
-    const msg = new SpeechSynthesisUtterance("أيها الفرعون الصغير، قل القوة الفرعونية لتبدأ المغامرة");
+  // 1. نداء الملك توت عند البداية [cite: 2025-12-24]
+  const startQuest = () => {
+    const msg = new SpeechSynthesisUtterance("أيها الفرعون الصغير، قل القوة الفرعونية لتبدأ");
     msg.lang = 'ar-EG';
     msg.rate = 0.8;
     window.speechSynthesis.speak(msg);
+    setStep('NAMING');
   };
 
-  // محاكاة التعرف على النطق (سيتم تطويرها لاحقاً لتعمل بالميكروفون الحقيقي)
-  const handleVoiceCommand = () => {
-    setGameState('NAMING');
-    const msg = new SpeechSynthesisUtterance("أهلاً بك.. اختر اسماً ملكياً تحبه");
+  // 2. محاكاة بناء الأفاتار سحرياً [cite: 2025-12-24]
+  const buildAvatar = () => {
+    setIsBuilding(true);
+    const msg = new SpeechSynthesisUtterance(`جاري بناء تمثالك الملكي يا ${name}`);
     msg.lang = 'ar-EG';
     window.speechSynthesis.speak(msg);
+    
+    setTimeout(() => {
+      setStep('BUILDING_AVATAR');
+      setIsBuilding(false);
+    }, 3000);
   };
 
   return (
-    <div className="min-h-screen bg-[#001b48] text-white flex flex-col items-center justify-center overflow-hidden font-serif">
+    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-black font-serif">
       
-      {/* خلفية واجهة المتحف الكبير [cite: 2025-12-24] */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#002366]/80 to-black z-10" />
+      {/* خلفية المتحف الكبير - ثابتة وعميقة [cite: 2025-12-24] */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-[#001b48]/40 to-black z-10" />
         <motion.img 
-          initial={{ scale: 1.2 }}
+          initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
-          transition={{ duration: 10 }}
-          src="https://images.unsplash.com/photo-1572252009286-268acec5a0af?auto=format&fit=crop&q=80" 
-          className="w-full h-full object-cover opacity-40"
+          transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
+          src="https://images.unsplash.com/photo-1539760397268-33f5146bd94b?auto=format&fit=crop&q=80" // صورة تعبيرية للمتحف والتماثيل
+          className="w-full h-full object-cover"
         />
       </div>
 
-      <AnimatePresence mode="wait">
-        {/* المرحلة الأولى: النداء الملكي */}
-        {gameState === 'WELCOME' && (
-          <motion.div 
-            key="welcome"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="z-20 text-center px-4"
-          >
+      {/* محتوى اللعبة في المنتصف تماماً [cite: 2025-12-24] */}
+      <main className="z-20 w-full max-w-4xl text-center px-6">
+        <AnimatePresence mode="wait">
+          
+          {/* الخطوة 1: واجهة الدخول */}
+          {step === 'ENTRANCE' && (
             <motion.div 
-              animate={{ y: [0, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 3 }}
-              className="mb-8"
+              key="ent"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, y: -50 }}
+              className="space-y-8"
             >
-              <Crown className="w-24 h-24 text-[#D4AF37] mx-auto drop-shadow-[0_0_20px_#D4AF37]" />
-            </motion.div>
-            
-            <h1 className="text-4xl md:text-6xl font-black text-[#D4AF37] mb-6 tracking-widest uppercase">
-              The Grand Museum
-            </h1>
-            
-            <button 
-              onClick={() => { playTutGreeting(); handleVoiceCommand(); }}
-              className="group relative px-12 py-6 bg-transparent border-2 border-[#D4AF37] overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-[#D4AF37] translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              <span className="relative z-10 text-[#D4AF37] group-hover:text-black font-bold text-2xl flex items-center gap-4">
-                <Mic size={24} /> القوة الفرعونية
-              </span>
-            </button>
-          </motion.div>
-        )}
-
-        {/* المرحلة الثانية: اختيار الاسم */}
-        {gameState === 'NAMING' && (
-          <motion.div 
-            key="naming"
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="z-20 text-center w-full max-w-md px-6"
-          >
-            <h2 className="text-[#D4AF37] text-3xl mb-8 font-bold tracking-widest">مرحباً بك يا بطل.. ما هو اسمك؟</h2>
-            <input 
-              type="text"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              className="w-full bg-white/5 border-b-4 border-[#D4AF37] text-4xl text-center py-4 outline-none focus:bg-white/10 transition-all text-[#D4AF37]"
-              placeholder="اكتب اسمك هنا..."
-            />
-            {playerName.length > 2 && (
-              <motion.button
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                onClick={() => setGameState('AVATAR_SELECTION')}
-                className="mt-12 bg-[#D4AF37] text-black px-10 py-4 rounded-full font-bold flex items-center gap-2 mx-auto"
+              <motion.div animate={{ rotateY: 360 }} transition={{ duration: 4, repeat: Infinity }}>
+                <Crown className="w-24 h-24 text-[#D4AF37] mx-auto drop-shadow-[0_0_30px_#D4AF37]" />
+              </motion.div>
+              <h1 className="text-6xl md:text-8xl font-black text-[#D4AF37] tracking-[10px] uppercase drop-shadow-2xl">
+                The Grand Museum
+              </h1>
+              <button 
+                onClick={startQuest}
+                className="mt-10 px-16 py-8 bg-[#D4AF37] text-black text-2xl font-bold rounded-full hover:scale-110 transition-transform shadow-[0_0_50px_rgba(212,175,55,0.5)] flex items-center gap-4 mx-auto"
               >
-                تأكيد الاسم <UserCheck />
-              </motion.button>
-            )}
-          </motion.div>
-        )}
+                <Mic size={30} /> قل: القوة الفرعونية
+              </button>
+            </motion.div>
+          )}
 
-        {/* المرحلة الثالثة: اختيار الأفاتار [cite: 2025-12-24] */}
-        {gameState === 'AVATAR_SELECTION' && (
-          <motion.div 
-            key="avatars"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="z-20 text-center"
-          >
-            <h2 className="text-[#D4AF37] text-3xl mb-12 font-bold uppercase tracking-[10px]">جسد شخصيتك الملكية</h2>
-            <div className="flex gap-8 justify-center flex-wrap">
-              {[1, 2, 3].map((num) => (
-                <motion.div
-                  key={num}
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  onClick={() => alert(`مبارك يا فرعون ${playerName}! لقد بدأت المغامرة`)}
-                  className="w-40 h-56 bg-white/5 border-2 border-[#D4AF37]/30 rounded-t-full cursor-pointer hover:border-[#D4AF37] flex flex-col items-center justify-center p-4"
+          {/* الخطوة 2: قول الاسم */}
+          {step === 'NAMING' && (
+            <motion.div 
+              key="name"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-10"
+            >
+              <h2 className="text-4xl text-white font-light tracking-[5px]">بماذا يناديك شعبك المريخي؟</h2>
+              <input 
+                autoFocus
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full max-w-lg bg-transparent border-b-4 border-[#D4AF37] text-6xl text-center py-4 text-[#D4AF37] outline-none placeholder:text-[#D4AF37]/20"
+                placeholder="اسمي تحتمس..."
+              />
+              {name.length > 2 && (
+                <motion.button
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  onClick={buildAvatar}
+                  disabled={isBuilding}
+                  className="bg-[#D4AF37] text-black px-12 py-4 rounded-xl font-black text-xl flex items-center gap-3 mx-auto"
                 >
-                  <div className="w-24 h-24 bg-slate-700 rounded-full mb-4 shadow-[0_0_15px_rgba(212,175,55,0.3)]" />
-                  <span className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest">Pharaoh {num}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  {isBuilding ? "سحر الفراعنة يعمل..." : "ابنِ تمثالي الملكي"} <Wand2 />
+                </motion.button>
+              )}
+            </motion.div>
+          )}
 
-      {/* لمسة الإبهار: جزيئات غبار الذهب المتطايرة [cite: 2025-12-24] */}
-      <div className="absolute inset-0 pointer-events-none z-30">
-        {[...Array(20)].map((_, i) => (
+          {/* الخطوة 3: تجسيد الأفاتار [cite: 2025-12-24] */}
+          {step === 'BUILDING_AVATAR' && (
+            <motion.div 
+              key="avatar"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="space-y-8"
+            >
+              <div className="relative w-64 h-80 mx-auto">
+                {/* هالة النور حول الأفاتار */}
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 bg-[#D4AF37] blur-[60px] rounded-full"
+                />
+                {/* تمثال الأفاتار الذهبي */}
+                <div className="relative z-10 w-full h-full bg-slate-800 rounded-t-full border-4 border-[#D4AF37] flex flex-col items-center justify-center">
+                   <Crown className="w-16 h-16 text-[#D4AF37] mb-4" />
+                   <p className="text-2xl font-black text-[#D4AF37] uppercase">{name}</p>
+                   <p className="text-[10px] text-white/50 tracking-[5px] mt-2">Pharaoh Activated</p>
+                </div>
+              </div>
+              <h3 className="text-3xl text-white font-bold tracking-widest uppercase">تم تجسيدك بنجاح يا {name}</h3>
+              <button className="bg-white text-black px-10 py-4 font-bold rounded-full animate-bounce">
+                ادخل قاعة الحروف
+              </button>
+            </motion.div>
+          )}
+
+        </AnimatePresence>
+      </main>
+
+      {/* تأثير جزيئات السحر (Magic Particles) [cite: 2025-12-24] */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(15)].map((_, i) => (
           <motion.div
             key={i}
             animate={{ 
-              y: [0, -1000], 
-              opacity: [0, 0.7, 0],
-              x: Math.random() * 200 - 100 
+              y: [-10, -1000], 
+              x: [0, (i % 2 === 0 ? 50 : -50)],
+              opacity: [0, 1, 0] 
             }}
-            transition={{ duration: 5 + Math.random() * 5, repeat: Infinity }}
+            transition={{ duration: 4, repeat: Infinity, delay: i * 0.5 }}
             className="absolute bottom-0 left-1/2 w-1 h-1 bg-[#D4AF37] rounded-full"
           />
         ))}
