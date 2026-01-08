@@ -1,86 +1,118 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Mic, ArrowLeft, Star, Camera } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Volume2, Sparkles, Star } from 'lucide-react';
 
 export default function AlphabetPlanet() {
   const router = useRouter();
-  const [selectedChar, setSelectedChar] = useState<any>(null);
+  const [activeStage, setActiveStage] = useState('INTRO'); // INTRO, MIRROR, CHALLENGE, SUCCESS
+  const [isListening, setIsListening] = useState(false);
 
-  const alphabet = [
-    { char: "أ", word: "أرنب", color: "#D4AF37" },
-    { char: "ب", word: "بطة", color: "#C0C0C0" },
-    { char: "ت", word: "تفاحة", color: "#D4AF37" },
-    { char: "ث", word: "ثعلب", color: "#C0C0C0" },
-    { char: "ج", word: "جمل", color: "#D4AF37" },
-  ];
-
-  const playExperience = (item: any) => {
-    setSelectedChar(item);
-    const msg = new SpeechSynthesisUtterance(item.char + ".." + item.word);
-    msg.lang = 'ar-EG';
-    msg.rate = 0.8;
+  // 1. وظيفة نطق Gemini (الملك توت) للكلمة [cite: 2025-12-24]
+  const speakWord = (text: string, lang: string = 'ar-EG') => {
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = lang;
+    msg.rate = 0.9;
     window.speechSynthesis.speak(msg);
   };
 
+  // 2. تفعيل تحدي النطق للطفل [cite: 2025-12-24]
+  const startChallenge = () => {
+    const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!Recognition) return;
+    const mic = new Recognition();
+    mic.lang = 'ar-EG';
+
+    mic.onstart = () => setIsListening(true);
+    mic.onresult = (e: any) => {
+      const transcript = e.results[0][0].transcript;
+      if (transcript.includes("أنا") || transcript.includes("انا")) {
+        setActiveStage('SUCCESS');
+        speakWord("برافو! إنت فعلاً ملك المريخ", 'ar-EG');
+      }
+    };
+    mic.onend = () => setIsListening(false);
+    mic.start();
+  };
+
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-8 relative overflow-hidden font-sans">
-      <div className="max-w-6xl mx-auto relative z-10">
-        <motion.button 
-          whileHover={{ x: -5 }}
-          onClick={() => router.back()} 
-          className="flex items-center gap-3 text-[#D4AF37] mb-16 font-bold tracking-widest uppercase text-sm"
-        >
-          <ArrowLeft size={18} /> Exit Mission
-        </motion.button>
+    <div className="min-h-screen bg-[#050505] text-white overflow-hidden font-serif">
+      {/* العودة للمقر [cite: 2025-12-24] */}
+      <button 
+        onClick={() => router.push('/academy')}
+        className="fixed top-8 left-8 z-50 flex items-center gap-2 text-[#D4AF37] hover:scale-110 transition-transform"
+      >
+        <ArrowLeft /> Back to Hub
+      </button>
 
-        <header className="text-center mb-20">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-            <Sparkles className="mx-auto text-[#D4AF37] mb-4" size={40} />
-          </motion.div>
-          <h1 className="text-6xl font-serif text-[#D4AF37] mb-4 tracking-tighter">كوكب الحروف</h1>
-          <p className="text-white/30 uppercase tracking-[0.5em] text-xs font-light">The Golden Phonetics of Mars</p>
-        </header>
-
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-          {alphabet.map((item, index) => (
-            <motion.div
-              key={item.char}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.05, rotate: 2 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => playExperience(item)}
-              className={`h-52 rounded-[2.5rem] flex flex-col items-center justify-center cursor-pointer border-2 transition-all duration-500 shadow-2xl relative overflow-hidden ${selectedChar?.char === item.char ? 'border-[#D4AF37] bg-gradient-to-br from-[#D4AF37]/20 to-transparent' : 'border-white/10 bg-white/5'}`}
-            >
-              <span className={`text-6xl font-black mb-2 transition-colors ${selectedChar?.char === item.char ? 'text-[#D4AF37]' : 'text-white'}`}>
-                {item.char}
-              </span>
-              <AnimatePresence>
-                {selectedChar?.char === item.char && (
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 text-[#D4AF37] font-bold">
-                    <Volume2 size={16} className="animate-pulse" /> {item.word}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </div>
-
-        {selectedChar && (
+      <AnimatePresence mode="wait">
+        {/* المرحلة الأولى: اختيار الحرف [cite: 2025-12-24] */}
+        {activeStage === 'INTRO' && (
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }} 
-            animate={{ opacity: 1, scale: 1 }}
-            className="mt-20 p-12 rounded-[4rem] bg-gradient-to-r from-[#D4AF37]/10 to-transparent border border-[#D4AF37]/20 text-center relative"
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="flex flex-col items-center justify-center min-h-screen"
           >
-            <Star className="absolute top-[-20px] left-1/2 -translate-x-1/2 text-[#D4AF37] fill-[#D4AF37]" size={40} />
-            <h3 className="text-[#D4AF37] text-2xl font-bold mb-2">نطق ملكي ممتاز!</h3>
-            <p className="text-xl text-white/70 italic">"أنتِ الآن تتحدثين لغة الأرض من قلب المريخ يا جلالة الملكة."</p>
+            <motion.div 
+              whileHover={{ rotateY: 180 }}
+              transition={{ duration: 0.8 }}
+              onClick={() => {
+                setActiveStage('MIRROR');
+                speakWord("أ... أنا", 'ar-EG');
+              }}
+              className="w-64 h-80 bg-gradient-to-b from-[#D4AF37] to-[#8B4513] rounded-t-full border-4 border-[#ffd700] flex items-center justify-center cursor-pointer shadow-[0_0_50px_rgba(212,175,55,0.3)]"
+            >
+              <span className="text-9xl font-bold text-black">أ</span>
+            </motion.div>
+            <p className="mt-8 text-[#D4AF37] tracking-[5px] animate-pulse">لمس الحرف لفتح البوابة</p>
           </motion.div>
         )}
-      </div>
+
+        {/* المرحلة الثانية: المرآة السحرية (أنا) [cite: 2025-12-24] */}
+        {activeStage === 'MIRROR' && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center min-h-screen relative"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#D4AF37]/20 via-transparent to-transparent animate-pulse" />
+            
+            <motion.div 
+              initial={{ y: 50 }} animate={{ y: 0 }}
+              className="relative w-80 h-80 rounded-full border-8 border-[#D4AF37] bg-white/10 backdrop-blur-3xl overflow-hidden shadow-[0_0_100px_#D4AF37]"
+            >
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Camera className="w-20 h-20 text-[#D4AF37]/30" />
+                {/* هنا يمكن دمج رابط الكاميرا لاحقاً ليرا الطفل نفسه بزي ملكي [cite: 2025-12-24] */}
+              </div>
+            </motion.div>
+
+            <h2 className="text-6xl mt-12 font-bold text-[#D4AF37] tracking-widest">أنا • ANA</h2>
+            <button 
+              onClick={startChallenge}
+              className={`mt-8 px-10 py-4 rounded-full border-2 border-[#D4AF37] flex items-center gap-4 transition-all ${isListening ? 'bg-[#D4AF37] text-black scale-110' : 'hover:bg-[#D4AF37]/20'}`}
+            >
+              <Mic className={isListening ? 'animate-bounce' : ''} />
+              {isListening ? "Listening..." : "Say 'ANA' like a King"}
+            </button>
+          </motion.div>
+        )}
+
+        {/* المرحلة الثالثة: احتفالية النجاح [cite: 2025-12-24] */}
+        {activeStage === 'SUCCESS' && (
+          <motion.div 
+            initial={{ scale: 0 }} animate={{ scale: 1 }}
+            className="flex flex-col items-center justify-center min-h-screen"
+          >
+            <Sparkles className="w-32 h-32 text-[#D4AF37] mb-8 animate-spin" />
+            <h1 className="text-7xl font-black text-[#D4AF37] mb-4">MUBARAK!</h1>
+            <p className="text-2xl italic text-white/80">You've mastered your first Martian word!</p>
+            <div className="mt-12 flex gap-4">
+               <div className="p-4 bg-white/5 rounded-2xl border border-[#D4AF37] text-[#D4AF37]"> +100 XP </div>
+               <div className="p-4 bg-white/5 rounded-2xl border border-[#D4AF37] text-[#D4AF37]"> Royal Badge 🏅 </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
